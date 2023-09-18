@@ -57,16 +57,7 @@ client.on("chat", (channel, userstate, message, self) => {
     return;
   }
 
-  if (command === "!roll") {
-    client.say(
-      channel,
-      `@${username} rolled a ${Math.floor(Math.random() * 6) + 1}!`
-    );
-    return;
-  }
-
-  // random weapon command, obtain a random splatoon weapon from the imported weapons array
-  if (command === "!rw2") {
+  if (command === "!rw") {
     client.say(
       channel,
       `@${username} ${weapons[Math.floor(Math.random() * weapons.length + 1)]}`
