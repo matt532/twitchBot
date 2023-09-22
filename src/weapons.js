@@ -1,4 +1,4 @@
-export let weapons = [
+export default [
   "Sploosh-o-matic",
   "Neo Sploosh-o-matic",
   "Splattershot Jr",

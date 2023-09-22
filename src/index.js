@@ -1,7 +1,8 @@
 import "dotenv/config";
 import tmi from "tmi.js";
-import { weapons } from "./weapons.js";
-import { getUser, getChannelInfo } from "./endpoints.js";
+import dayjs from "dayjs";
+import weapons from "./weapons.js";
+import * as endpointModules from "./endpoints.js";
 
 const option = {
   options: {
@@ -47,6 +48,15 @@ client.on("chat", (channel, userstate, message, self) => {
     return;
   }
 
+  if (command === "!turf") {
+    endpointModules.getTurfMaps().then(turf => {
+      const msg = mapRotationMsg(username, 'Turf War', turf[0].maps, turf[0].endTime)
+      client.say(channel, msg)
+      console.log(turf)
+    })
+    return
+  }
+
   if (command === "^") {
     client.say(channel, "^^");
     return;
@@ -68,7 +78,7 @@ client.on("chat", (channel, userstate, message, self) => {
   if (command === "!lurk") {
     client.say(
       channel,
-      `@${username} finished their milkshake and decided to head out, thanks for stopping by! crowsp2Lurk`
+      `@${username} took to the skies crowsp2Lurk`
     );
     return;
   }
@@ -76,7 +86,7 @@ client.on("chat", (channel, userstate, message, self) => {
   if (command === "!unlurk") {
     client.say(
       channel,
-      `@${username} decided to come back for more milkshakes`
+      `@${username} flew back to the birb nest crowsp2Birb`
     );
     return;
   }
@@ -129,16 +139,17 @@ async function shoutoutStreamer(channel, message) {
   // remove '@' character if user was specified through @ mention
   if (username[0] === "@") username = username.substring(1);
   // get user information from helix/users endpoint
-  let userInfo = await getUser(username);
+  let userInfo = await endpointModules.getUser(username);
   // if user with given username doesn't exist, return
-  if (userInfo.data.length === 0) {
+  console.log(userInfo)
+  if (userInfo?.data?.length === 0) {
     client.say(channel, "Error: channel not found");
     return;
   }
   // userID for the given user
   let userID = userInfo.data[0].id;
   // get channel info from helix/channels endpoint
-  let channelInfo = await getChannelInfo(userID);
+  let channelInfo = await endpointModules.getChannelInfo(userID);
   // channel info to use for the shoutout
   let shoutout = { user: username, game: channelInfo.data[0].game_name };
   if (shoutout.game.length === 0) {
@@ -146,12 +157,12 @@ async function shoutoutStreamer(channel, message) {
   }
   client.say(
     channel,
-    "Go check out " +
-      shoutout.user +
-      " at twitch.tv/" +
-      shoutout.user +
-      " where they last played " +
-      shoutout.game +
-      "!"
+    `Go check out ${shoutout.user} at twitch.tv/${shoutout.user} where they last played ${shoutout.game}!`
   );
+}
+
+function mapRotationMsg(user, mode, maps, time) {
+  let timeLeft = dayjs(time).diff(dayjs(), 'minutes')
+  let msg = `@${user} current ${mode} maps: ${maps[0]} and ${maps[1]}, ends in ${timeLeft}m`
+  return msg
 }
