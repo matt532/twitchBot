@@ -80,3 +80,27 @@ export async function getTurfMaps() {
   console.log(turfMaps)
   return turfMaps
 }
+
+async function getAnarchyMaps() {
+  const seriesMaps = (await getMaps())?.bankaraSchedules.nodes.map((node) => {
+    return node?.bankaraMatchSettings?.map(matchSettings => {
+      return {
+        endTime: node.endTime,
+        maps: matchSettings.vsStages.map(stage => stage.name),
+        gameMode: matchSettings.vsRule.name,
+        anarchyMode: matchSettings.bankaraMode
+      }
+    })
+  });
+  const seriesMapsFlat = [].concat(...seriesMaps)
+  console.log(seriesMapsFlat)
+  return seriesMapsFlat
+}
+
+export async function getSeriesMaps(){
+  return (await getAnarchyMaps())?.filter(mapSet => mapSet.anarchyMode === 'CHALLENGE')
+}
+
+export async function getOpenMaps(){
+  return (await getAnarchyMaps())?.filter(mapSet => mapSet.anarchyMode === 'OPEN')
+}

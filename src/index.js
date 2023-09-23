@@ -2,7 +2,7 @@ import "dotenv/config";
 import tmi from "tmi.js";
 import dayjs from "dayjs";
 import weapons from "./weapons.js";
-import * as endpointModules from "./endpoints.js";
+import * as modules from "./modules.js";
 
 const option = {
   options: {
@@ -49,10 +49,26 @@ client.on("chat", (channel, userstate, message, self) => {
   }
 
   if (command === "!turf") {
-    endpointModules.getTurfMaps().then(turf => {
+    modules.getTurfMaps().then(turf => {
       const msg = mapRotationMsg(username, 'Turf War', turf[0].maps, turf[0].endTime)
       client.say(channel, msg)
       console.log(turf)
+    })
+    return
+  }
+
+  if (command === "!series") {
+    modules.getSeriesMaps().then(series => {
+      const msg = mapRotationMsg(username, series[0].gameMode, series[0].maps, series[0].endTime, 'Series ')
+      client.say(channel, msg)
+    })
+    return
+  }
+  
+  if (command === "!open") {
+    modules.getOpenMaps().then(open => {
+      const msg = mapRotationMsg(username, open[0].gameMode, open[0].maps, open[0].endTime, 'Open ')
+      client.say(channel, msg)
     })
     return
   }
@@ -139,7 +155,7 @@ async function shoutoutStreamer(channel, message) {
   // remove '@' character if user was specified through @ mention
   if (username[0] === "@") username = username.substring(1);
   // get user information from helix/users endpoint
-  let userInfo = await endpointModules.getUser(username);
+  let userInfo = await modules.getUser(username);
   // if user with given username doesn't exist, return
   console.log(userInfo)
   if (userInfo?.data?.length === 0) {
@@ -149,7 +165,7 @@ async function shoutoutStreamer(channel, message) {
   // userID for the given user
   let userID = userInfo.data[0].id;
   // get channel info from helix/channels endpoint
-  let channelInfo = await endpointModules.getChannelInfo(userID);
+  let channelInfo = await modules.getChannelInfo(userID);
   // channel info to use for the shoutout
   let shoutout = { user: username, game: channelInfo.data[0].game_name };
   if (shoutout.game.length === 0) {
@@ -161,8 +177,8 @@ async function shoutoutStreamer(channel, message) {
   );
 }
 
-function mapRotationMsg(user, mode, maps, time) {
+function mapRotationMsg(user, mode, maps, time, battleType='') {
   let timeLeft = dayjs(time).diff(dayjs(), 'minutes')
-  let msg = `@${user} current ${mode} maps: ${maps[0]} and ${maps[1]}, ends in ${timeLeft}m`
+  let msg = `@${user} current ${battleType}maps: ${mode} on ${maps[0]} and ${maps[1]}, ends in ${timeLeft}m`
   return msg
 }
