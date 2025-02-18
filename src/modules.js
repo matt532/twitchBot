@@ -1,5 +1,6 @@
 import "dotenv/config";
 import fetch from "node-fetch";
+import { get } from "./utils/request";
 // import fs from 'fs'
 
 const token = process.env.OAUTH_TOKEN;
@@ -11,12 +12,13 @@ const BASE_TWITCH_URL = 'https://api.twitch.tv/helix'
 export async function getUser(username) {
   console.log(username)
   const url = `${BASE_TWITCH_URL}/users?login=${username}`
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Client-Id": clientID,
-    },
-  });
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Client-Id": clientID,
+  }
+  const res = await get(url, headers)
+  // const res = await fetch(url, {
+  // });
   if (res.status === 401) {
     console.log('Error 401 unauthorized, check access token expiration')
   }
@@ -24,8 +26,8 @@ export async function getUser(username) {
     console.log("An error occured, status " + res.status);
     return;
   }
-  const obj = await res.json();
-  return obj;
+  // const obj = await res.json();
+  return res.data;
 }
 
 export async function getChannelInfo(userID) {
