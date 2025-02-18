@@ -4,6 +4,9 @@ import dayjs from "dayjs";
 import weapons from "./weapons.js";
 import * as modules from "./modules.js";
 
+const channel = process.env.CHANNEL
+const token = process.env.OAUTH_TOKEN
+
 const option = {
   options: {
     debug: true,
@@ -13,21 +16,21 @@ const option = {
     reconnect: true,
   },
   identity: {
-    username: process.env.CHANNEL,
-    password: process.env.OAUTH,
+    username: channel,
+    password: `oauth:${token}`,
   },
-  channels: [process.env.CHANNEL],
+  channels: [channel],
 };
 
 const client = new tmi.client(option);
-client.connect();
-
-client.on("connectFailed", function (error) {
+client.connect().then(() => {
+  client.say(channel, "Bot has connected");
+}).catch(error => {
   console.log("Connect Error: " + error.toString());
 });
 
-client.on("connected", () => {
-  client.say(process.env.CHANNEL, "Bot has connected");
+client.on('message', (channel, tags, message, self) => {
+  console.log(`${tags['display-name']}: ${message}`);
 });
 
 // when a message is sent in chat

@@ -2,8 +2,8 @@ import "dotenv/config";
 import fetch from "node-fetch";
 // import fs from 'fs'
 
-const accessToken = process.env.ACCESS_TOKEN;
-const clientID = process.env.API_CLIENT_ID;
+const token = process.env.OAUTH_TOKEN;
+const clientID = process.env.CLIENT_ID;
 const BASE_TWITCH_URL = 'https://api.twitch.tv/helix'
 
 // TODO: add function to get new access token if current token is expired
@@ -13,7 +13,7 @@ export async function getUser(username) {
   const url = `${BASE_TWITCH_URL}/users?login=${username}`
   const res = await fetch(url, {
     headers: {
-      Authorization: "Bearer " + accessToken,
+      Authorization: `Bearer ${token}`,
       "Client-Id": clientID,
     },
   });
@@ -32,7 +32,7 @@ export async function getChannelInfo(userID) {
   const url = `${BASE_TWITCH_URL}/channels?broadcaster_id=${userID}`
   const res = await fetch(url, {
     headers: {
-      Authorization: "Bearer " + accessToken,
+      Authorization: "Bearer " + token,
       "Client-Id": clientID,
     },
   });
