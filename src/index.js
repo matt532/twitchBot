@@ -5,7 +5,7 @@ import weapons from "./weapons.js";
 import * as modules from "./modules.js";
 
 const channel = process.env.CHANNEL
-const token = process.env.OAUTH_TOKEN
+const token = process.env.ACCESS_TOKEN
 
 const option = {
   options: {
