@@ -1,6 +1,5 @@
 import "dotenv/config";
-import fetch from "node-fetch";
-// import fs from 'fs'
+import { get } from "./utils/request.js";
 
 const token = process.env.ACCESS_TOKEN;
 const clientID = process.env.CLIENT_ID;
@@ -9,14 +8,12 @@ const BASE_TWITCH_URL = 'https://api.twitch.tv/helix'
 // TODO: add function to get new access token if current token is expired
 
 export async function getUser(username) {
-  console.log(username)
   const url = `${BASE_TWITCH_URL}/users?login=${username}`
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Client-Id": clientID,
-    },
-  });
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Client-Id": clientID,
+  }
+  const res = await get(url, { headers });
   if (res.status === 401) {
     console.log('Error 401 unauthorized, check access token expiration')
   }
@@ -24,18 +21,17 @@ export async function getUser(username) {
     console.log("An error occured, status " + res.status);
     return;
   }
-  const obj = await res.json();
-  return obj;
+
+  return res.data
 }
 
 export async function getChannelInfo(userID) {
   const url = `${BASE_TWITCH_URL}/channels?broadcaster_id=${userID}`
-  const res = await fetch(url, {
-    headers: {
-      Authorization: "Bearer " + token,
-      "Client-Id": clientID,
-    },
-  });
+  const headers = {
+    Authorization: "Bearer " + token,
+    "Client-Id": clientID,
+  }
+  const res = await get(url, { headers });
   if (res.status === 400) {
     console.log("Missing query parameter");
     return;
@@ -48,25 +44,12 @@ export async function getChannelInfo(userID) {
     console.log("Unknown error, status code " + res.status);
     return;
   }
-  const obj = await res.json();
-  return obj;
+
+  return res.data;
 }
 
 async function getMaps() {
-  const url = 'https://splatoon3.ink/data/schedules.json'
-  const maps = await fetch(url).then(res => {
-    return res.json()
-  }).then(jsonRes => {
-    return jsonRes
-  }).catch(err => {
-    console.log(err)
-  })
-  // console.log(maps)
-  // fs.writeFile('./maps.json', JSON.stringify(maps), err => {
-  //   if (err) {
-  //     console.log(err)
-  //   }
-  // })
+  const maps = (await get('https://splatoon3.ink/data/schedules.json')).data
   return maps?.data
 }
 
