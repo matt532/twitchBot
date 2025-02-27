@@ -8,8 +8,17 @@ const clientSecret = process.env.CLIENT_SECRET;
 const refreshToken = process.env.REFRESH_TOKEN
 const BASE_TWITCH_URL = 'https://api.twitch.tv/helix'
 
-// TODO: add function to get new access token if current token is expired
-const refreshExpiredToken = async () => {
+export const isTokenExpired = async () => {
+  const headers = { Authorization: `Bearer ${token}` }
+  try {
+    await get("https://id.twitch.tv/oauth2/validate", { headers })
+    return false
+  } catch (error) {
+    return true
+  }
+}
+
+export const refreshExpiredToken = async () => {
   const data = {
     client_id: clientID,
     client_secret: clientSecret,
