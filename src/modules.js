@@ -1,11 +1,24 @@
 import "dotenv/config";
-import { get } from "./utils/request.js";
+import qs from "qs"
+import { get, post } from "./utils/request.js";
 
 const token = process.env.ACCESS_TOKEN;
 const clientID = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
+const refreshToken = process.env.REFRESH_TOKEN
 const BASE_TWITCH_URL = 'https://api.twitch.tv/helix'
 
 // TODO: add function to get new access token if current token is expired
+const refreshExpiredToken = async () => {
+  const data = {
+    client_id: clientID,
+    client_secret: clientSecret,
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+  }
+  const newToken = (await post("https://id.twitch.tv/oauth2/token", qs.stringify(data))).data
+  return newToken
+}
 
 export async function getUser(username) {
   const url = `${BASE_TWITCH_URL}/users?login=${username}`
@@ -13,16 +26,21 @@ export async function getUser(username) {
     Authorization: `Bearer ${token}`,
     "Client-Id": clientID,
   }
-  const res = await get(url, { headers });
-  if (res.status === 401) {
-    console.log('Error 401 unauthorized, check access token expiration')
+  try {
+    const res = await get(url, { headers });
+    return res.data
+  } catch (error) {
+    if (error.status === 401) {
+      console.log('Error 401 unauthorized, check access token expiration')
+      refreshExpiredToken()
+      return
+    }
+    if (error.status !== 200) {
+      console.log("An error occured, status " + res.status);
+      return;
+    }
+    console.error("error")
   }
-  if (res.status !== 200) {
-    console.log("An error occured, status " + res.status);
-    return;
-  }
-
-  return res.data
 }
 
 export async function getChannelInfo(userID) {

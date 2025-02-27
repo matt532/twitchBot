@@ -160,7 +160,6 @@ async function shoutoutStreamer(channel, message) {
   // get user information from helix/users endpoint
   let userInfo = await modules.getUser(username);
   // if user with given username doesn't exist, return
-  console.log(userInfo)
   if (userInfo?.data?.length === 0) {
     client.say(channel, "Error: channel not found");
     return;
