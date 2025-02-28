@@ -3,12 +3,13 @@ import tmi from "tmi.js";
 import dayjs from "dayjs";
 import weapons from "./weapons.js";
 import * as modules from "./modules.js";
-import { getTwitchConfig, isTokenExpired, refreshExpiredToken } from "./utils/config.js";
+import { getTwitchConfig, isTokenExpired, refreshExpiredToken } from "./utils/twitch/config.js";
+import { getUser, getChannelInfo } from "./utils/twitch/twitchAPI.js";
 
 const channel = process.env.CHANNEL
 let config = await getTwitchConfig()
 if(await isTokenExpired(config.accessToken))
-  config = await refreshExpiredToken()
+  config.accessToken = await refreshExpiredToken()
 
 const start = () => {
   const option = {
@@ -169,7 +170,7 @@ async function shoutoutStreamer(client, channel, message) {
   // remove '@' character if user was specified through @ mention
   if (username[0] === "@") username = username.substring(1);
   // get user information from helix/users endpoint
-  let userInfo = await modules.getUser(username);
+  let userInfo = await getUser(username);
   // if user with given username doesn't exist, return
   if (userInfo?.data?.length === 0) {
     client.say(channel, "Error: channel not found");
@@ -178,7 +179,7 @@ async function shoutoutStreamer(client, channel, message) {
   // userID for the given user
   let userID = userInfo.data[0].id;
   // get channel info from helix/channels endpoint
-  let channelInfo = await modules.getChannelInfo(userID);
+  let channelInfo = await getChannelInfo(userID);
   // channel info to use for the shoutout
   let shoutout = { user: username, game: channelInfo.data[0].game_name };
   if (shoutout.game.length === 0) {

@@ -1,6 +1,6 @@
 import fs from "fs/promises"
 import "dotenv/config"
-import { get, post } from "./request.js"
+import { get, post } from "../request.js"
 import qs from "qs"
 
 let twitchConfig = null
@@ -17,11 +17,9 @@ export const getTwitchConfig = async () => {
   return twitchConfig
 }
 
-export const updateTwitchConfig = (newToken) => {
+const updateTwitchConfig = async (newToken) => {
   twitchConfig.accessToken = newToken
-  fs.writeFile(filePath, JSON.stringify(twitchConfig))
-
-  return twitchConfig
+  await fs.writeFile(filePath, JSON.stringify(twitchConfig)).catch(err => console.error(err))
 }
 
 export const isTokenExpired = async () => {
@@ -44,6 +42,7 @@ export const refreshExpiredToken = async () => {
     refresh_token: config.refreshToken,
   }
   const newTokenData = (await post("https://id.twitch.tv/oauth2/token", qs.stringify(data))).data
-  
-  return updateTwitchConfig(newTokenData.access_token)
+  await updateTwitchConfig(newTokenData.access_token)
+
+  return newTokenData.access_token
 }
