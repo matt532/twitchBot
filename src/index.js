@@ -2,7 +2,8 @@ import "dotenv/config";
 import tmi from "tmi.js";
 import dayjs from "dayjs";
 import weapons from "./weapons.js";
-import * as modules from "./modules.js";
+// import * as modules from "./utils/splat/maps.js";
+import maps from "./utils/splat/maps.js";
 import { getTwitchConfig, isTokenExpired, refreshExpiredToken } from "./utils/twitch/config.js";
 import { getUser, getChannelInfo } from "./utils/twitch/twitchAPI.js";
 
@@ -57,16 +58,16 @@ const start = () => {
     }
   
     if (command === "!turf") {
-      modules.getTurfMaps().then(turf => {
-        const msg = mapRotationMsg(username, 'Turf War', turf[0].maps, turf[0].endTime)
+      maps("turf").then(turf => {
+        const msg = mapRotationMsg(username, 'Turf war', turf[0].maps, turf[0].endTime)
         client.say(channel, msg)
-        console.log(turf)
+        // console.log(turf)
       })
       return
     }
   
     if (command === "!series") {
-      modules.getSeriesMaps().then(series => {
+      maps("series").then(series => {
         const msg = mapRotationMsg(username, series[0].gameMode, series[0].maps, series[0].endTime, 'Series ')
         client.say(channel, msg)
       })
@@ -74,8 +75,25 @@ const start = () => {
     }
     
     if (command === "!open") {
-      modules.getOpenMaps().then(open => {
-        const msg = mapRotationMsg(username, open[0].gameMode, open[0].maps, open[0].endTime, 'Open ')
+      maps("open").then(open => {
+        const msg = mapRotationMsg(username, open[0].gameMode, open[0].maps, open[0].endTime, 'open ')
+        client.say(channel, msg)
+      })
+      return
+    }
+
+    if (command === "!salmon") {
+      maps("salmon").then(sr => {
+        const currRot = sr[0]
+        const weaponsStr = currRot.weapons.join(", ")
+        const timeLeft = dayjs(currRot.endTime).diff(dayjs(), 'minutes')
+        client.say(channel, `Current Salmon Run map: ${currRot.map} with ${weaponsStr}. King Salmonid: ${currRot.boss}. Ends in ends in ${timeLeft}m`)
+      })
+    }
+
+    if (command === "!x") {
+      maps("x").then(x => {
+        const msg = mapRotationMsg(username, x[0].gameMode, x[0].maps, x[0].endTime, 'X rank ')
         client.say(channel, msg)
       })
       return
