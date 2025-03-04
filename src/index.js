@@ -2,7 +2,6 @@ import "dotenv/config";
 import tmi from "tmi.js";
 import dayjs from "dayjs";
 import weapons from "./weapons.js";
-// import * as modules from "./utils/splat/maps.js";
 import maps from "./utils/splat/maps.js";
 import { getTwitchConfig, isTokenExpired, refreshExpiredToken } from "./utils/twitch/config.js";
 import { getUser, getChannelInfo } from "./utils/twitch/twitchAPI.js";
@@ -50,6 +49,10 @@ const start = () => {
     const isVIP = badges.vip;
     const isModUp = isMod || isBroadcaster;
     const command = message.split(" ")[0];
+
+    if(message.includes("bunny")) {
+      client.say(channel, "Buy your sea bunny plush here: https://mahoukarp.com/collections/plushies/products/instock-sea-bunny")
+    }
   
     if (command.toLowerCase() === "cat") {
       // TODO: add cooldown so this command doesn't get too spammy
@@ -61,7 +64,6 @@ const start = () => {
       maps("turf").then(turf => {
         const msg = mapRotationMsg(username, 'Turf war', turf[0].maps, turf[0].endTime)
         client.say(channel, msg)
-        // console.log(turf)
       })
       return
     }
@@ -130,11 +132,6 @@ const start = () => {
         channel,
         `@${username} flew back to the birb nest crowsp2Birb`
       );
-      return;
-    }
-  
-    if (command === "!fc") {
-      client.say(channel, "SW-3605-7316-8603");
       return;
     }
   
